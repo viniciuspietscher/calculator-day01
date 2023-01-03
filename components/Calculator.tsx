@@ -1,4 +1,4 @@
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from "@mui/material/Unstable_Grid2"
 import {
   Box,
   Paper,
@@ -9,52 +9,82 @@ import {
   Button,
   Divider,
   Typography,
-} from "@mui/material";
-import { OutlinedInput } from "@mui/material";
-import axios from "axios";
+} from "@mui/material"
+import { OutlinedInput } from "@mui/material"
+import axios from "axios"
 
-import { useState, useRef, ChangeEvent, FormEvent } from "react";
+import { useState, useRef, ChangeEvent, FormEvent, useEffect } from "react"
 
 const Calculator = (): JSX.Element => {
-  const [operation, setOperation] = useState("");
-  const [result, setResult] = useState("");
+  const [operation, setOperation] = useState("")
+  const [result, setResult] = useState("")
+  const [isError, setIsError] = useState({
+    first: "false",
+    second: "false",
+    operation: "false",
+  })
   // const first = useRef<HTMLInputElement>();
   // const second = useRef<HTMLInputElement>();
 
   const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setOperation(e.target.value);
-  };
+    setOperation(e.target.value)
+  }
 
   interface MyForm extends EventTarget {
-    first: HTMLInputElement;
-    second: HTMLInputElement;
+    first: HTMLInputElement
+    second: HTMLInputElement
   }
 
   const handleCalculate = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const target = e.target as MyForm;
+    e.preventDefault()
+    const target = e.target as MyForm
     const query = {
       operation: operation,
       first: target.first.value,
       second: target.second.value,
-    };
+    }
 
-    axios
-      .get(`/api/calculate/${query.operation}/${query.first}/${query.second}`)
-      .then((res) => {
-        setResult(res.data.result);
-      })
-      .catch((err) => {
-        setResult(err.response.data.message);
-      });
-  };
+    if (isNaN(query.first)) {
+      setIsError({ ...isError, first: "true" })
+    }
+    if (isNaN(query.second)) {
+      console.log()
+
+      setIsError({ ...isError, second: "true" })
+    }
+    if (query.operation === "") {
+      console.log("operation")
+
+      setIsError({ ...isError, operation: "true" })
+    }
+
+    if (!isError) {
+      axios
+        .get(`/api/calculate/${query.operation}/${query.first}/${query.second}`)
+        .then((res) => {
+          setResult(res.data.result)
+        })
+        .catch((err) => {
+          setResult(err.response.data.message)
+        })
+    }
+  }
+
+  console.log(isError)
 
   return (
     <form id="calculator-form" onSubmit={handleCalculate}>
       <Grid2 container spacing={1}>
         <Grid2 xs={5}>
           <FormControl fullWidth>
-            <TextField id="first" label="First Number" variant="outlined" />
+            <TextField
+              id="first"
+              label="First Number"
+              variant="outlined"
+              // type="number"
+              // error
+              // helperText="Incorrect entry."
+            />
           </FormControl>
         </Grid2>
         <Grid2 xs={2}>
@@ -78,7 +108,12 @@ const Calculator = (): JSX.Element => {
         </Grid2>
         <Grid2 xs={5}>
           <FormControl fullWidth>
-            <TextField id="second" label="Second Number" variant="outlined" />
+            <TextField
+              id="second"
+              label="Second Number"
+              variant="outlined"
+              // type="number"
+            />
           </FormControl>
         </Grid2>
         <Grid2 xs={12}>
@@ -102,7 +137,6 @@ const Calculator = (): JSX.Element => {
         </Grid2>
       </Grid2>
     </form>
-  );
-};
-export default Calculator;
-
+  )
+}
+export default Calculator
