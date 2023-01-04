@@ -10,20 +10,20 @@ import {
   Divider,
   Typography,
 } from "@mui/material"
+import FormHelperText from "@mui/material/FormHelperText"
 import { OutlinedInput } from "@mui/material"
 import axios from "axios"
 
-import { useState, useRef, ChangeEvent, FormEvent, useEffect } from "react"
+import { useState, useRef, ChangeEvent, FormEvent } from "react"
 
 const Calculator = (): JSX.Element => {
   const [operation, setOperation] = useState("")
   const [result, setResult] = useState("")
-  const [isError, setIsError] = useState({
-    first: "false",
-    second: "false",
-    operation: "false",
-  })
-  // const first = useRef<HTMLInputElement>();
+  const [isFirstError, setIsFirstError] = useState("")
+  const [isSecondError, setIsSecondError] = useState("")
+  const [isOperationError, setIsOperationError] = useState("")
+
+  //const first = useRef<HTMLInputElement>();
   // const second = useRef<HTMLInputElement>();
 
   const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -36,29 +36,31 @@ const Calculator = (): JSX.Element => {
   }
 
   const handleCalculate = (e: FormEvent<HTMLFormElement>) => {
+    // setResult("")
     e.preventDefault()
     const target = e.target as MyForm
+
+    let firstError = ""
+    let secondError = ""
+    let operationError = ""
+
     const query = {
       operation: operation,
       first: target.first.value,
       second: target.second.value,
     }
 
-    if (isNaN(query.first)) {
-      setIsError({ ...isError, first: "true" })
+    if (isNaN(parseInt(query.first))) {
+      firstError = "first is not a number"
     }
-    if (isNaN(query.second)) {
-      console.log()
-
-      setIsError({ ...isError, second: "true" })
+    if (isNaN(parseInt(query.second))) {
+      secondError = "Second is not a number"
     }
     if (query.operation === "") {
-      console.log("operation")
-
-      setIsError({ ...isError, operation: "true" })
+      operationError = "Operations is not selected"
     }
 
-    if (!isError) {
+    if (!firstError && !secondError && !operationError) {
       axios
         .get(`/api/calculate/${query.operation}/${query.first}/${query.second}`)
         .then((res) => {
@@ -68,9 +70,10 @@ const Calculator = (): JSX.Element => {
           setResult(err.response.data.message)
         })
     }
+    setIsFirstError(firstError)
+    setIsSecondError(secondError)
+    setIsOperationError(operationError)
   }
-
-  console.log(isError)
 
   return (
     <form id="calculator-form" onSubmit={handleCalculate}>
@@ -81,14 +84,19 @@ const Calculator = (): JSX.Element => {
               id="first"
               label="First Number"
               variant="outlined"
-              // type="number"
-              // error
-              // helperText="Incorrect entry."
+              error={!!isFirstError}
+              helperText={isFirstError}
+              //inputRef={first}
+              onFocus={() => setIsFirstError("")}
             />
           </FormControl>
         </Grid2>
         <Grid2 xs={2}>
-          <FormControl fullWidth>
+          <FormControl
+            fullWidth
+            error={!!isOperationError}
+            onFocus={() => setIsOperationError("")}
+          >
             <NativeSelect
               input={<OutlinedInput />}
               defaultValue={""}
@@ -104,6 +112,7 @@ const Calculator = (): JSX.Element => {
               <option value={"multiply"}>*</option>
               <option value={"divide"}>/</option>
             </NativeSelect>
+            <FormHelperText>{isOperationError}</FormHelperText>
           </FormControl>
         </Grid2>
         <Grid2 xs={5}>
@@ -112,7 +121,10 @@ const Calculator = (): JSX.Element => {
               id="second"
               label="Second Number"
               variant="outlined"
-              // type="number"
+              error={!!isSecondError}
+              helperText={isSecondError}
+              //inputRef={second}
+              onFocus={() => setIsSecondError("")}
             />
           </FormControl>
         </Grid2>
