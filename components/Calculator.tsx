@@ -51,13 +51,13 @@ const Calculator = (): JSX.Element => {
     }
 
     if (isNaN(parseInt(query.first))) {
-      firstError = "first is not a number"
+      firstError = "First is not a number"
     }
     if (isNaN(parseInt(query.second))) {
       secondError = "Second is not a number"
     }
     if (query.operation === "") {
-      operationError = "Operations is not selected"
+      operationError = "Operation is not selected"
     }
 
     if (!firstError && !secondError && !operationError) {
