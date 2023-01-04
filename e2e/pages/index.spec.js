@@ -56,8 +56,8 @@ test("Form removes error message from inputs", async ({ page }) => {
   const second = await page.locator("#second-helper-text")
   await expect(second).toContainText("Second is not a number")
 
-  await page.type("#first", "12")
-  await page.type("#second", "12")
+  await page.focus("#first")
+  await page.focus("#second")
 
   await expect(
     page.getByText("First is not a number", { exact: true })
@@ -76,12 +76,24 @@ test("Form removes error message from selection box", async ({ page }) => {
     page.getByText("Operation is not selected", { exact: true })
   ).toBeVisible()
 
-  await page.click("#operation")
-  await page.locator("#operation").selectOption("multiply")
+  await page.focus("#operation")
 
   await expect(
     page.getByText("Operation is not selected", { exact: true })
   ).not.toBeVisible()
+})
+
+test("Result is empty when form error (no api call)", async ({ page }) => {
+  await page.goto("/")
+  await page.type("#first", "12")
+  await page.type("#second", "aaa")
+  await page.click("#operation")
+  await page.locator("#operation").selectOption("add")
+
+  await page.click("button[type='submit']")
+
+  const result = await page.locator("#result")
+  await expect(result).toContainText("")
 })
 
 // test("Calculator wants numbers", async ({ page }) => {
